@@ -82,34 +82,33 @@ jobs:
       - run:
           name: Run server tests
           command: npm test
-
   publish-server:
-  docker:
-    - image: cimg/base:current
-  working_directory: ~/project/server
-  steps:
-    - checkout:
-        path: ~/project
-    - setup_remote_docker:
-        docker_layer_caching: true
-    - run:
-        name: Set image tag
-        command: |
-          IMAGE_TAG=$(jq -r '.version' package.json)
-          echo "export IMAGE_TAG=$IMAGE_TAG" >> $BASH_ENV
-          echo "IMAGE_TAG: $IMAGE_TAG"
-          source $BASH_ENV
-    - run:
-        name: Build production image
-        command: |
-          docker build -t $DOCKERHUB_USERNAME/dynamic-config:$IMAGE_TAG --target prod .
-    - run:
-        name: Authenticate, tag, and push image to Docker Hub
-        command: |
-          echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USERNAME --password-stdin
-          docker tag $DOCKERHUB_USERNAME/dynamic-config:$IMAGE_TAG $DOCKERHUB_USERNAME/dynamic-config:latest
-          docker push $DOCKERHUB_USERNAME/dynamic-config:$IMAGE_TAG
-          docker push $DOCKERHUB_USERNAME/dynamic-config:latest
+    docker:
+      - image: cimg/base:current
+    working_directory: ~/project/server
+    steps:
+      - checkout:
+          path: ~/project
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Set image tag
+          command: |
+            IMAGE_TAG=$(jq -r '.version' package.json)
+            echo "export IMAGE_TAG=$IMAGE_TAG" >> $BASH_ENV
+            echo "IMAGE_TAG: $IMAGE_TAG"
+            source $BASH_ENV
+      - run:
+          name: Build production image
+          command: |
+            docker build -t $DOCKERHUB_USERNAME/dynamic-config:$IMAGE_TAG --target prod .
+      - run:
+          name: Authenticate, tag, and push image to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASSWORD" | docker login -u $DOCKERHUB_USERNAME --password-stdin
+            docker tag $DOCKERHUB_USERNAME/dynamic-config:$IMAGE_TAG $DOCKERHUB_USERNAME/dynamic-config:latest
+            docker push $DOCKERHUB_USERNAME/dynamic-config:$IMAGE_TAG
+            docker push $DOCKERHUB_USERNAME/dynamic-config:latest
 
 workflows:
   test-and-publish-server:
